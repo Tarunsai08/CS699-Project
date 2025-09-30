@@ -11,12 +11,11 @@ This project is about helping patients who need organ transplants by matching th
 
 ## Technology Used  
 - **Python** for scraping and data processing  
-- **BeautifulSoup**, **Selenium** for web scraping  
+- **BeautifulSoup** for web scraping  
 - **PyPDF2** for extracting data from PDFs  
 - **Pandas / NumPy** for cleaning and handling data  
-- **Database**: MySQL, SQLite, or MongoDB  
-- **Matching logic**: rule-based (blood group, organ type)  
-- **Optional**: Flask or Django for a web interface  
+- **Database**:  MongoDB  
+- **Matching logic**: rule-based (blood group, organ type, age)  
 
 ## How It Works  
 1. Data is scraped from the internet or extracted from PDFs.  
@@ -24,5 +23,3 @@ This project is about helping patients who need organ transplants by matching th
 3. A patient request is entered into the system with their details.  
 4. The program runs a matching algorithm to compare the patient’s needs with available donors.  
 5. The result shows the most suitable donor(s).  
-
-Modified by main
