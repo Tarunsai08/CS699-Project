@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block content %}
+  <section class="hero">
+    <h1>Find potential organ donors faster</h1>
+    <p>Hospitals upload donor CSVs. Users search for donors by organ, blood group and age. Visual insights help decision making.</p>
+    <div class="cta">
+      <a class="btn" href="{{ url_for('search') }}">Search donors</a>
+      <a class="btn ghost" href="{{ url_for('hospital_login') }}">Hospital login</a>
+    </div>
+  </section>
+
+  <section class="features">
+    <div class="card">
+      <h3>Hospitals</h3>
+      <p>Upload CSVs from your hospital records. Each row is stored exactly as in the CSV (Serial No is ignored).</p>
+    </div>
+    <div class="card">
+      <h3>Users</h3>
+      <p>Sign up and search donors. Results show table + useful visualizations generated from matched donors.</p>
+    </div>
+    <div class="card">
+      <h3>Admin</h3>
+      <p>Admin can create hospital accounts (default admin/admin). Hospitals then log in and upload data.</p>
+    </div>
+  </section>
+{% endblock %}

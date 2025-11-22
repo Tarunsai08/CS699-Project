@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h2>Search Results</h2>
+
+  <!-- Dashboard cards -->
+  <div class="card" style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px;">
+    <div style="flex:1;min-width:160px;padding:12px;">
+      <h4>Total matches</h4>
+      <p style="font-size:22px;font-weight:700;">{{ metrics.total_matches }}</p>
+    </div>
+    <div style="flex:1;min-width:160px;padding:12px;">
+      <h4>Best match score</h4>
+      <p style="font-size:22px;font-weight:700;">{{ metrics.best_score }}</p>
+    </div>
+    <div style="flex:1;min-width:160px;padding:12px;">
+      <h4>Same blood group</h4>
+      <p style="font-size:22px;font-weight:700;">{{ metrics.same_blood_count }}</p>
+    </div>
+    <div style="flex:1;min-width:160px;padding:12px;">
+      <h4>Average donor age</h4>
+      <p style="font-size:22px;font-weight:700;">{{ metrics.avg_age }}</p>
+    </div>
+    <div style="flex:2;min-width:220px;padding:12px;">
+      <h4>Age match range</h4>
+      <p>{{ metrics.age_range }}</p>
+      <h5 style="margin-top:6px;">Organs in matches</h5>
+      <p style="font-size:13px;color:#333;">{{ metrics.organs_available }}</p>
+    </div>
+  </div>
+
+  <!-- Charts area -->
+  <div class="card" style="padding:20px;margin-bottom:24px;">
+    <h3 style="margin-bottom:18px;">Analytics</h3>
+  
+    <div style="
+        display:grid;
+        grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+        gap:22px;
+    ">
+      {% for c in charts %}
+        <div style="
+          background:#fff;
+          border-radius:12px;
+          padding:14px;
+          box-shadow:0 4px 12px rgba(0,0,0,0.08);
+          border:1px solid #e3e6ec;
+          display:flex;
+          flex-direction:column;
+        ">
+          <div style="font-weight:600;font-size:15px;margin-bottom:10px;color:#2a3b4f;">
+            {{ c.label }}
+          </div>
+          <img 
+            src="{{ url_for('uploaded_file', filename=c.filename) }}" 
+            alt="{{ c.label }}" 
+            style="
+              width:100%;
+              height:260px;
+              object-fit:contain;
+              border-radius:8px;
+              background:#fafafa;
+              padding:6px;
+              border:1px solid #d9dfe7;
+            "
+          >
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+  
+
+  <!-- Matched donors table -->
+  <div class="card">
+    <h3>Matched donors</h3>
+    {% if matches %}
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Organ</th>
+            <th>Age</th>
+            <th>Blood</th>
+            <th>Hospital</th>
+            <th>Uploaded at</th>
+            <th>Score</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for d in matches %}
+            <tr>
+              <td>{{ loop.index }}</td>
+              <td>{{ d.get('Name') or d.get('name') or '-' }}</td>
+              <td>{{ d.get('Organ','-') }}</td>
+              <td>{{ d.get('Age','-') }}</td>
+              <td>{{ d.get('Blood_Type','-') }}</td>
+              <td>{{ d.get('hospital_name','-') }}</td>
+              <td>{{ d.get('uploaded_at_display','-') }}</td>
+              <td>{{ d.get('_score',0)|round(1) }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p>No matches found for your criteria.</p>
+    {% endif %}
+  </div>
+{% endblock %}

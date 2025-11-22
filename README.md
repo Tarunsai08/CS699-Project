@@ -1,25 +1,41 @@
-# Organ Donation Matching Project  
+# Organ Donation Mapper (Flask + MongoDB)
 
-## Introduction  
-This project is about helping patients who need organ transplants by matching them with possible donors. We collect information from the internet and from PDF files about available organs and donor details. When a patient needs a particular organ, our system checks their details (like blood group, organ type, etc.) and finds the best matching donor. The main idea is to make the process of finding donors faster and easier.  
+## Overview
+Simple project to allow hospitals to upload donor CSVs and public users to search for matching donors. Donor rows are stored exactly as in the CSV (Serial No is ignored). Each donor record also stores `hospital_name` and `uploaded_at`.
 
-## Features  
-- Collect donor and organ information from online sources and PDFs.  
-- Store and manage the collected data in a structured way.  
-- Match patients to donors based on important factors (blood group, organ type, etc.).  
-- Provide donor details to patients (or doctors) who need them.  
+Three roles:
+- **admin** — manage hospital accounts (default admin/admin)
+- **hospital** — login and upload CSV files (admin creates hospital accounts)
+- **user** — public users who sign up and search donors
 
-## Technology Used  
-- **Python** for scraping and data processing  
-- **BeautifulSoup** for web scraping  
-- **PyPDF2** for extracting data from PDFs  
-- **Pandas / NumPy** for cleaning and handling data  
-- **Database**:  MongoDB  
-- **Matching logic**: rule-based (blood group, organ type, age)  
+## Tech stack
+- Python (Flask)
+- MongoDB Atlas (pymongo)
+- Pandas (CSV parsing)
+- Matplotlib + Seaborn (visualizations)
+- Plain HTML/CSS (templates in `templates/`)
 
-## How It Works  
-1. Data is scraped from the internet or extracted from PDFs.  
-2. The data is cleaned and saved into a database.  
-3. A patient request is entered into the system with their details.  
-4. The program runs a matching algorithm to compare the patient’s needs with available donors.  
-5. The result shows the most suitable donor(s).  
+## File structure
+(see project root)
+
+## How donor data is stored
+- The `donors` collection stores only the CSV-provided columns for each uploaded CSV row.
+- Two additional system fields are added:
+  - `hospital_name` — hospital username that uploaded this CSV
+  - `uploaded_at` — UTC timestamp of upload
+- The application automatically **ignores** a `Serial No` column if present.
+
+## Matching logic (brief)
+- Primary filter: **Organ** matches exactly (case-insensitive).
+- Optional filters: **Blood_Type** (exact), **Age** range (min/max).
+- Simple scoring:
+  - Exact blood-type match gets a high score bonus.
+  - Age proximity to user's range center gives small bonus.
+- Results are sorted by this simple score and returned to the user.
+- Visualizations: age histogram, blood-group counts, matches-by-hospital pie chart.
+
+## Setup & Run (local)
+1. Clone the project:
+   ```bash
+   git clone <this-repo>
+   cd organ-donation-mapper

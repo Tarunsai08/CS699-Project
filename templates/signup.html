@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block content %}
+  <div class="card form-card">
+    <h2>Create an account</h2>
+    <form method="post">
+      <label>Username<input name="username" required></label>
+      <label>Password<input type="password" name="password" required></label>
+      <label>Full name<input name="name"></label>
+      <label>Email<input name="email" type="email"></label>
+      <label>Phone<input name="phone"></label>
+      <label>City<input name="city"></label>
+      <input type="number" name="age" placeholder="Age" required>
+      <select name="blood_group" required>
+        <option value="">Select Blood Group</option>
+        <option>A+</option><option>A-</option>
+        <option>B+</option><option>B-</option>
+        <option>O+</option><option>O-</option>
+        <option>AB+</option><option>AB-</option>
+      </select>
+      <div class="form-actions">
+        <button class="btn" type="submit">Sign up</button>
+        <a class="link" href="{{ url_for('login') }}">Already have an account?</a>
+      </div>
+    </form>
+  </div>
+{% endblock %}

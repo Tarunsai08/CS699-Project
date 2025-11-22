@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h2>Admin Dashboard</h2>
+  <div class="card">
+    <a class="btn" href="{{ url_for('admin_new_hospital') }}">Create new hospital</a>
+  </div>
+
+  <div class="card">
+    <h3>Hospitals</h3>
+    <table>
+      <thead>
+        <tr><th>#</th><th>Username</th><th>Display name</th><th>Email</th><th>Active</th><th>Created at</th></tr>
+      </thead>
+      <tbody>
+        {% for h in hospitals %}
+        <tr>
+          <td>{{ loop.index }}</td>
+          <td>{{ h.username }}</td>
+          <td>{{ h.display_name }}</td>
+          <td>{{ h.email or '-' }}</td>
+          <td>{{ 'Yes' if h.active else 'No' }}</td>
+          <td>{{ h.created_at.strftime('%Y-%m-%d') if h.created_at else '-' }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

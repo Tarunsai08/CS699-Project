@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h2>Hospital Dashboard</h2>
+  <div class="card">
+    <a class="btn" href="{{ url_for('hospital_upload') }}">Upload new CSV</a>
+  </div>
+
+  <div class="card">
+    <h3>Your uploaded donors</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          {% if donors %}
+            {% for k in donors[0].keys() %}
+              {% if k not in ['_id','uploaded_at'] %}
+                <th>{{ k }}</th>
+              {% endif %}
+            {% endfor %}
+            <th>Uploaded at</th>
+          {% endif %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for d in donors %}
+          <tr>
+            <td>{{ loop.index }}</td>
+            {% for k, v in d.items() %}
+              {% if k not in ['_id','uploaded_at'] %}
+                <td>{{ v }}</td>
+              {% endif %}
+            {% endfor %}
+            <td>{{ d.uploaded_at.strftime('%Y-%m-%d %H:%M') if d.uploaded_at else '-' }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

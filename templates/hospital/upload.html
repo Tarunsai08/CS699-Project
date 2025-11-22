@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block content %}
+  <div class="card form-card">
+    <h2>Upload Donor CSV</h2>
+    <p>Upload CSV exported from hospital records. The system stores exactly the CSV columns (Serial No is ignored by default).</p>
+
+    <form method="post" enctype="multipart/form-data">
+      <label>CSV file<input type="file" name="file" accept=".csv" required></label>
+      <div class="form-actions">
+        <button class="btn" type="submit">Upload</button>
+      </div>
+    </form>
+  </div>
+{% endblock %}

@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Organ Donation Mapper</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <a class="brand" href="{{ url_for('index') }}">
+        <img src="{{ url_for('static', filename='img/logo.png') }}" alt="logo" class="logo">
+        Organ Donation Mapper
+      </a>
+      <nav class="main-nav">
+        <a href="{{ url_for('index') }}">Home</a>
+        <a href="{{ url_for('search') }}">Search</a>
+        {% if 'user' not in session %}
+          <a href="{{ url_for('signup') }}">Sign up</a>
+          <a href="{{ url_for('login') }}">Login</a>
+          <a href="{{ url_for('hospital_login') }}">Hospital Login</a>
+        {% else %}
+          {% if session.role == 'admin' %}
+            <a href="{{ url_for('admin_dashboard') }}">Admin</a>
+          {% elif session.role == 'hospital' %}
+            <a href="{{ url_for('hospital_dashboard') }}">Hospital</a>
+          {% endif %}
+          <a href="{{ url_for('logout') }}">Logout ({{ session.user }})</a>
+        {% endif %}
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-messages">
+          {% for cat, msg in messages %}
+            <div class="flash {{ cat }}">{{ msg }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <small>Organ Donation Mapper — Simple demo project • Built with Flask & MongoDB</small>
+    </div>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,262 @@
+/* Simple modern (clean) styles for demo UI */
+
+:root {
+    --accent: #2F80ED;
+    --muted: #6b6b6b;
+    --bg: #f7f9fc;
+    --card: #ffffff;
+    --radius: 10px;
+    --max-width: 1100px;
+    --container-padding: 18px;
+}
+
+* {
+    box-sizing: border-box;
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+}
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: #222;
+    line-height: 1.45;
+}
+
+.container {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: var(--container-padding);
+}
+
+.site-header {
+    background: linear-gradient(90deg, #fff 0%, #f4f7fb 100%);
+    border-bottom: 1px solid #eee;
+}
+
+.site-header .container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 18px;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    color: #222;
+    font-weight: 700;
+}
+
+.logo {
+    width: 42px;
+    height: 42px;
+    background: #ddd;
+    border-radius: 8px;
+    padding: 6px;
+}
+
+.main-nav a {
+    margin-left: 14px;
+    color: #333;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.main-nav a:hover {
+    color: var(--accent);
+}
+
+.hero {
+    padding: 36px;
+    background: linear-gradient(180deg, #fff, #ffffff);
+    border-radius: 12px;
+    margin-top: 18px;
+    text-align: center;
+}
+
+.hero h1 {
+    margin: 0 0 8px;
+    font-size: 32px;
+}
+
+.hero p {
+    color: var(--muted);
+    margin: 0 0 16px;
+}
+
+.btn {
+    display: inline-block;
+    background: var(--accent);
+    color: #fff;
+    padding: 10px 16px;
+    border-radius: 8px;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+}
+
+.btn.ghost {
+    background: transparent;
+    color: var(--accent);
+    border: 2px solid var(--accent);
+}
+
+.btn+.btn {
+    margin-left: 8px;
+}
+
+.features {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-top: 18px;
+}
+
+.card {
+    background: var(--card);
+    padding: 16px;
+    border-radius: var(--radius);
+    box-shadow: 0 4px 18px rgba(33, 33, 33, 0.04);
+}
+
+.card h3 {
+    margin-top: 0;
+}
+
+.form-card {
+    max-width: 700px;
+    margin: 20px auto;
+    padding: 18px;
+}
+
+.form-card label {
+    display: block;
+    margin-bottom: 12px;
+    font-size: 14px;
+}
+
+.form-card input[type="text"],
+.form-card input[type="password"],
+.form-card input[type="email"],
+.form-card input[type="number"],
+.form-card input[type="file"] {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #e6e9ef;
+    margin-top: 6px;
+}
+
+.form-actions {
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.link {
+    color: var(--accent);
+    text-decoration: none;
+    margin-left: 10px;
+}
+
+.flash-messages {
+    margin: 12px 0;
+}
+
+.flash {
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 6px;
+}
+
+.flash.success {
+    background: #eaf6ed;
+    border: 1px solid #bfe6c8;
+    color: #166d2d;
+}
+
+.flash.danger {
+    background: #ffecec;
+    border: 1px solid #f5c2c2;
+    color: #7a1c1c;
+}
+
+.flash.warning {
+    background: #fff7e6;
+    border: 1px solid #ffe2a8;
+    color: #6a4b00;
+}
+
+.flash.info {
+    background: #e8f4ff;
+    border: 1px solid #cfe8ff;
+    color: #244e8a;
+}
+
+.results-table table,
+.card table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.card table th,
+.card table td {
+    padding: 8px;
+    border-bottom: 1px solid #f0f0f0;
+    text-align: left;
+    font-size: 14px;
+}
+
+.results-table th {
+    background: #fafafa;
+}
+
+.charts-row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+}
+
+.chart-card {
+    flex: 1;
+    min-width: 220px;
+    background: #fff;
+    padding: 8px;
+    border-radius: 8px;
+    box-shadow: 0 6px 18px rgba(16, 24, 40, 0.03);
+}
+
+.chart-img {
+    width: 100%;
+    height: auto;
+    border-radius: 6px;
+}
+
+.site-footer {
+    margin-top: 28px;
+    padding: 18px 0;
+    text-align: center;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+/* healthcare clean UI tweaks */
+.card {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 18px;
+    border: 1px solid #e6ebf2;
+    box-shadow: 0 6px 18px rgba(16,24,40,0.06);
+  }
+  
+  /* responsive for small screens */
+  @media(max-width: 640px) {
+    img {
+      height: 200px !important;
+    }
+  }
+  
