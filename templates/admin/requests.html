@@ -6,11 +6,11 @@
   <table>
     <thead>
       <tr>
-        <th>User</th>
+        <th>user</th>
         <th>Organ</th>
         <th>Status</th>
-        <th>Requested On</th>
-        <th>Approve</th>
+        <th>requested on</th>
+        <th>Aprove</th>
       </tr>
     </thead>
     <tbody>
@@ -28,7 +28,7 @@
           {% if r.status == 'pending' %}
           <form method="post" action="{{ url_for('admin_handle_request_action', req_id=r._id) }}" style="display:inline;">
               <input type="hidden" name="action" value="approve">
-              <button class="btn-approve">Approve</button>
+              <button class="btn-approve">approve</button>
           </form>
 
           <form method="post" action="{{ url_for('admin_handle_request_action', req_id=r._id) }}" style="display:inline;">

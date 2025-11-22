@@ -22,10 +22,10 @@ last_names = [
 ]
 
 TOTAL_ENTRIES = 3600
-organ_list = (
+organ_list = (  
     ["Kidney"] * 2567 + 
-    ["Liver"] * 932 + 
-    ["Heart"] * 47 +   
+    ["Liver"] * 932 +
+    ["Heart"] * 47 +  
     ["Lung"] * 43 +     
     ["Pancreas"] * 7 +    
     ["Small Bowel"] * 4    

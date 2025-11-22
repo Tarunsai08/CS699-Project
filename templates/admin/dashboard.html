@@ -2,14 +2,14 @@
 {% block content %}
   <h2>System Administration</h2>
   <div class="card">
-    <a class="btn" href="{{ url_for('admin_new_hospital') }}">Register New Institution</a>
+    <a class="btn" href="{{ url_for('admin_new_hospital') }}">Register a  New Institution</a>
     <a class="btn" href="{{ url_for('admin_requests') }}">View Organ Requests</a>
   </div>
 
   <div class="card">
-    <h3>Registered Institutions</h3>
+    <h3>registered institutions</h3>
     <form method="get" style="margin-bottom: 20px;">
-      <input type="text" name="q" placeholder="Search hospitals..." 
+      <input name="q" type="text" placeholder="Search hospitls..." 
              value="{{ query or '' }}" class="search-input">
       <button class="btn" type="submit">Search</button>
     </form>    
@@ -35,7 +35,7 @@
           <td>{{ 'Active' if h.active else 'Inactive' }}</td>
           <td>{{ h.created_at.strftime('%Y-%m-%d') if h.created_at else '' }}</td>
           <td>
-            <a class="btn-small info" href="{{ url_for('admin_edit_hospital', hos_id=h._id) }}">Edit</a>
+            <a href="{{ url_for('admin_edit_hospital', hos_id=h._id) }}" class="btn-small info">edit</a>
           </td>
         </tr>
         {% endfor %}

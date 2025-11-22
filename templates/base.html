@@ -2,16 +2,16 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Organ Donation Mapper</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Organ donation mapper</title>
+  <meta content="width=device-width,initial-scale=1" name="viewport">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
   <header class="site-header">
     <div class="container">
-      <a class="brand" href="{{ url_for('index') }}">
+      <a href="{{ url_for('index') }}" class="brand">
         <img src="{{ url_for('static', filename='img/logo.png') }}" alt="logo" class="logo">
-        Organ Donation Mapper
+        Organ Donation mapper
       </a>
       <nav class="main-nav">
         <a href="{{ url_for('index') }}">Home</a>
@@ -31,7 +31,7 @@
           {% endif %}
           <a href="{{ url_for('logout') }}">Logout ({{ session.user }})</a>
         {% endif %}
-        <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">
+        <button class="theme-toggle" aria-label="Toggle dark mode" id="theme-toggle">
           <span class="theme-icon">🌙</span>
         </button>
       </nav>
@@ -53,12 +53,12 @@
   </main>
 
   <script>
-    // Dark mode toggle functionality
+    // dark mode functionality added
     const themeToggle = document.getElementById('theme-toggle');
     const themeIcon = document.querySelector('.theme-icon');
     const html = document.documentElement;
     
-    // Check for saved theme preference or default to light mode
+    // if already saved preference is there please load them
     const currentTheme = localStorage.getItem('theme') || 'light';
     html.setAttribute('data-theme', currentTheme);
     updateIcon(currentTheme);
