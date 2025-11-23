@@ -1,114 +1,96 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Search Results</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-</head>
-<body>
+{% extends 'base.html' %}
 
-    <header class="site-header">
-        <div class="container">
-            <a href="{{ url_for('index') }}" class="brand">
-                <div class="logo">OD</div>
-                OrganDonation
-            </a>
-            <nav class="main-nav">
-                <a href="{{ url_for('index') }}">Home</a>
-                <a href="{{ url_for('logout') }}">Logout</a>
-            </nav>
-        </div>
-    </header>
+{% block content %}
+<div style="margin-top: 30px;">
+    <h2>Search Results</h2>
+    <p style="color: #666;">
+        Matches for <strong>{{ user_blood }}</strong> user (Age: {{ user_age }})
+    </p>
 
-    <div class="container" style="margin-top: 30px;">
-        <h2>Search Results</h2>
-        <p style="color: #666;">
-            Matches for <strong>{{ user_blood }}</strong> user (Age: {{ user_age }})
-        </p>
-
-        <div class="features" style="margin-bottom: 30px;">
-            <div class="card">
-                <h3 style="font-size: 2em; margin-bottom: 5px; color: var(--accent);">{{ metrics.total_matches }}</h3>
-                <span style="color: #666;">Total Donors Found</span>
-            </div>
-            <div class="card">
-                <h3 style="font-size: 2em; margin-bottom: 5px; color: var(--accent);">{{ metrics.best_score }}</h3>
-                <span style="color: #666;">Top Match Score</span>
-            </div>
-            <div class="card">
-                <h3 style="font-size: 2em; margin-bottom: 5px; color: var(--accent);">{{ metrics.same_blood_count }}</h3>
-                <span style="color: #666;">Exact Blood Match</span>
-            </div>
+    <div class="features" style="margin-bottom: 30px;">
+        <div class="card">
+            <h3 style="font-size: 2em; margin-bottom: 5px; color: var(--accent);">
+                {{ metrics.total_matches }}
+            </h3>
+            <span style="color: #666;">Total Donors Found</span>
         </div>
-
-        {% if charts %}
-        <div class="charts-row">
-            {% for chart in charts %}
-            <div class="chart-card">
-                <h4 style="margin-top: 0; text-align: center;">{{ chart.label }}</h4>
-                <img src="{{ url_for('uploaded_file', filename=chart.filename) }}" class="chart-img" alt="Chart">
-            </div>
-            {% endfor %}
+        <div class="card">
+            <h3 style="font-size: 2em; margin-bottom: 5px; color: var(--accent);">
+                {{ metrics.best_score }}
+            </h3>
+            <span style="color: #666;">Top Match Score</span>
         </div>
-        {% endif %}
-
-        {% if matches %}
-        <div class="results-table">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Rank</th>
-                        <th>Score</th>
-                        <th>Viable Days</th> <th>Blood Type</th>
-                        <th>Age</th>
-                        <th>Organ</th>
-                        <th>Hospital / Source</th>
-                        <th>Uploaded</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for m in matches %}
-                    <tr>
-                        <td><strong>#{{ loop.index }}</strong></td>
-                        <td>
-                            <span style="color: var(--accent); font-weight: bold;">
-                                {{ m._score | round(1) }}
-                            </span>
-                        </td>
-                        <td>
-                            {% if '0 days' in m.days_left_display %}
-                                <span class="badge low">{{ m.days_left_display }}</span>
-                            {% else %}
-                                <span class="badge high">{{ m.days_left_display }}</span>
-                            {% endif %}
-                        </td>
-                        <td>{{ m.Blood_Type }}</td>
-                        <td>{{ m.Age }}</td>
-                        <td>{{ m.Organ }}</td>
-                        <td>{{ m.hospital_name }}</td>
-                        <td style="font-size: 0.85em; color: #666;">
-                            {{ m.uploaded_at_display }}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        <div class="card">
+            <h3 style="font-size: 2em; margin-bottom: 5px; color: var(--accent);">
+                {{ metrics.same_blood_count }}
+            </h3>
+            <span style="color: #666;">Exact Blood Match</span>
         </div>
-        {% else %}
-        <div class="card" style="text-align: center; padding: 40px;">
-            <h3>No matches found</h3>
-            <p>Try adjusting your search or wait for more hospitals to upload data.</p>
-            <a href="{{ url_for('index') }}" class="btn">Go Back</a>
-        </div>
-        {% endif %}
     </div>
 
-    <footer class="site-footer">
-        <div class="container">
-            &copy; 2025 Organ Donation Mapper
+    {% if charts %}
+    <div class="charts-row">
+        {% for chart in charts %}
+        <div class="chart-card">
+            <h4 style="margin-top: 0; text-align: center;">{{ chart.label }}</h4>
+            <img src="{{ url_for('uploaded_file', filename=chart.filename) }}"
+                 class="chart-img"
+                 alt="Chart">
         </div>
-    </footer>
+        {% endfor %}
+    </div>
+    {% endif %}
 
-</body>
-</html>
+    {% if matches %}
+    <div class="results-table">
+        <table>
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Score</th>
+                    <th>Viable Days</th>
+                    <th>Blood Type</th>
+                    <th>Age</th>
+                    <th>Organ</th>
+                    <th>Hospital / Source</th>
+                    <th>Uploaded</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for m in matches %}
+                <tr>
+                    <td><strong>#{{ loop.index }}</strong></td>
+                    <td>
+                        <span style="color: var(--accent); font-weight: bold;">
+                            {{ m._score | round(1) }}
+                        </span>
+                    </td>
+                    <td>
+                        {% if '0 days' in m.days_left_display %}
+                          <span class="badge low">{{ m.days_left_display }}</span>
+                        {% else %}
+                          <span class="badge high">{{ m.days_left_display }}</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ m.Blood_Type }}</td>
+                    <td>{{ m.Age }}</td>
+                    <td>{{ m.Organ }}</td>
+                    <td>{{ m.hospital_name }}</td>
+                    <td style="font-size: 0.85em; color: #666;">
+                        {{ m.uploaded_at_display }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% else %}
+    <div class="card" style="text-align: center; padding: 40px;">
+        <h3>No matches found</h3>
+        <p>Try adjusting your search or wait for more hospitals to upload data.</p>
+        <a href="{{ url_for('index') }}" class="btn">Go Back</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
