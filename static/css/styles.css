@@ -6,7 +6,7 @@
     --bg: #f7f9fc;
     --card: #ffffff;
     --radius: 10px;
-    --max-width: 1200px; /* Increased width for better table display */
+    --max-width: 1200px;
     --container-padding: 24px;
 }
 
@@ -133,7 +133,6 @@ body {
 
 .features {
     display: grid;
-    /* FIX: Responsive Grid instead of fixed columns */
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 24px;
     margin-top: 32px;
@@ -196,7 +195,6 @@ body {
 .flash.warning { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
 .flash.info { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
 
-/* Results Table Alignment Fixes */
 .results-table {
     overflow-x: auto;
     background: #fff;
@@ -208,7 +206,7 @@ body {
 table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 800px; /* Force scroll on small screens */
+    min-width: 800px;
 }
 
 th {
@@ -233,7 +231,6 @@ tr:last-child td {
     border-bottom: none;
 }
 
-/* Viability Badge Styling */
 .badge {
     display: inline-block;
     padding: 4px 10px;
@@ -246,21 +243,33 @@ tr:last-child td {
 .badge.med { background: #fffbeb; color: #b45309; }
 .badge.low { background: #fef2f2; color: #b91c1c; }
 
+/* --- UPDATED CHARTS LAYOUT --- */
 .charts-row {
     display: flex;
-    gap: 24px;
-    margin-bottom: 24px;
-    flex-wrap: wrap;
+    flex-direction: column; /* Forces vertical stacking */
+    gap: 30px;              /* Space between graphs */
+    margin-bottom: 40px;
+    width: 100%;
+    align-items: center;    /* Centers the graphs horizontally */
 }
 
 .chart-card {
-    flex: 1;
-    min-width: 300px;
+    width: 100%;
+    max-width: 800px;       /* Prevents graphs from getting too wide on huge screens */
     background: #fff;
-    padding: 16px;
+    padding: 20px;
     border-radius: 12px;
     border: 1px solid #eaecf0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
+
+.chart-img {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 8px;
+}
+/* ----------------------------- */
 
 .site-footer {
     margin-top: auto;
