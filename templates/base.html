@@ -19,7 +19,7 @@
         {% if 'user' not in session %}
           <a href="{{ url_for('signup') }}">Sign up</a>
           <a href="{{ url_for('login') }}">Login</a>
-          <a href="{{ url_for('hospital_login') }}">Hospital Login</a>
+          <a href="{{ url_for('hospital_login') }}">Hospital Portal</a>
         {% else %}
           {% if session.role == 'admin' %}
             <a href="{{ url_for('admin_dashboard') }}">Admin</a>
@@ -46,10 +46,5 @@
     {% block content %}{% endblock %}
   </main>
 
-  <footer class="site-footer">
-    <div class="container">
-      <small>Organ Donation Mapper — Simple demo project • Built with Flask & MongoDB</small>
-    </div>
-  </footer>
 </body>
 </html>

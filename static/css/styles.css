@@ -1,5 +1,3 @@
-/* Simple modern (clean) styles for demo UI */
-
 :root {
     --accent: #2F80ED;
     --muted: #6b6b6b;
@@ -243,19 +241,18 @@ tr:last-child td {
 .badge.med { background: #fffbeb; color: #b45309; }
 .badge.low { background: #fef2f2; color: #b91c1c; }
 
-/* --- UPDATED CHARTS LAYOUT --- */
 .charts-row {
     display: flex;
-    flex-direction: column; /* Forces vertical stacking */
-    gap: 30px;              /* Space between graphs */
+    flex-direction: column;
+    gap: 30px;
     margin-bottom: 40px;
     width: 100%;
-    align-items: center;    /* Centers the graphs horizontally */
+    align-items: center;
 }
 
 .chart-card {
     width: 100%;
-    max-width: 800px;       /* Prevents graphs from getting too wide on huge screens */
+    max-width: 800px;
     background: #fff;
     padding: 20px;
     border-radius: 12px;
@@ -269,7 +266,6 @@ tr:last-child td {
     display: block;
     border-radius: 8px;
 }
-/* ----------------------------- */
 
 .site-footer {
     margin-top: auto;

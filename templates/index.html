@@ -1,8 +1,8 @@
 {% extends 'base.html' %}
 {% block content %}
   <section class="hero">
-    <h1>Find potential organ donors faster</h1>
-    <p>Hospitals upload donor CSVs. Users search for donors by organ, blood group and age. Visual insights help decision making.</p>
+    <h1>Find potential organ donors efficiently</h1>
+    <p>A centralized platform for hospitals to manage donor records and for patients to find compatible matches using data-driven insights.</p>
     <div class="cta">
       <a class="btn" href="{{ url_for('search') }}">Search donors</a>
       <a class="btn ghost" href="{{ url_for('hospital_login') }}">Hospital login</a>
@@ -12,15 +12,15 @@
   <section class="features">
     <div class="card">
       <h3>Hospitals</h3>
-      <p>Upload CSVs from your hospital records. Each row is stored exactly as in the CSV (Serial No is ignored).</p>
+      <p>Securely upload and manage donor CSV records. The system automatically standardizes data formats for consistency.</p>
     </div>
     <div class="card">
       <h3>Users</h3>
-      <p>Sign up and search donors. Results show table + useful visualizations generated from matched donors.</p>
+      <p>Register to search the database. The matching algorithm considers blood type, age, and organ viability.</p>
     </div>
     <div class="card">
-      <h3>Admin</h3>
-      <p>Admin can create hospital accounts (default admin/admin). Hospitals then log in and upload data.</p>
+      <h3>Administration</h3>
+      <p>Centralized management for hospital credentialing and system oversight to ensure data integrity.</p>
     </div>
   </section>
 {% endblock %}

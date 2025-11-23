@@ -93,7 +93,6 @@ def login():
             session['user'] = user['username']
             session['role'] = user.get('role', 'user')
             flash('Logged in successfully', 'success')
-            # admin goes to admin dashboard
             if session['role'] == 'admin':
                 return redirect(url_for('admin_dashboard'))
             return redirect(url_for('index'))
@@ -261,7 +260,6 @@ def search():
 
         def score_match(doc):
             s = 0
-            # 1. Blood Match (Max 150)
             try:
                 doc_bg = str(doc.get('Blood_Type', '')).strip()
                 if doc_bg and doc_bg.lower() == user_blood.lower():
@@ -271,7 +269,6 @@ def search():
             except:
                 pass
             
-            # 2. Age Proximity (Max 60)
             try:
                 doc_age = int(doc.get('Age'))
                 age_diff = abs(doc_age - user_age)
@@ -279,7 +276,6 @@ def search():
             except:
                 pass
 
-            # 3. Viability / Freshness (Max 50)
             try:
                 ua = doc.get('uploaded_at')
                 if ua:
@@ -306,12 +302,10 @@ def search():
         for c in candidates:
             c['_score'] = score_match(c)
             
-            # --- ADD DISPLAY DATA FOR VIABILITY ---
             c['days_left_display'] = "Expired"
             try:
                 ua = c.get('uploaded_at')
                 if ua:
-                     # Normalizing to timezone aware if needed
                     if isinstance(ua, str):
                         ua = datetime.fromisoformat(ua)
                     if not ua.tzinfo:
@@ -322,7 +316,6 @@ def search():
                     now_utc = datetime.now(timezone.utc)
                     days_elapsed = (now_utc - ua).days
                     
-                    # Assuming 25 days is the "viable" window based on the scoring logic (50pts / 2pts per day)
                     days_left = 25 - days_elapsed
                     if days_left > 0:
                         c['days_left_display'] = f"{days_left} days"
