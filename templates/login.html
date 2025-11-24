@@ -7,7 +7,7 @@
       <label>Password<input type="password" name="password" required></label>
       <div class="form-actions">
         <button class="btn" type="submit">Sign In</button>
-        <a class="link" href="{{ url_for('signup') }}"><button class="btn" type="submit">Create an account</button></a>
+        <button class="btn" type="button" onclick="window.location.href='{{ url_for('signup') }}'">Create an account</button>
       </div>
     </form>
   </div>
