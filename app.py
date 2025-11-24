@@ -127,8 +127,18 @@ def signup():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        username = request.form.get('username').strip()
-        password = request.form.get('password')
+        username = request.form.get('username', '').strip()
+        password = request.form.get('password', '')
+        
+        # Validation checks
+        if not username:
+            flash('Username is required', 'danger')
+            return redirect(url_for('login'))
+        
+        if not password:
+            flash('Password is required', 'danger')
+            return redirect(url_for('login'))
+        
         user = users_col.find_one({'username': username})
         if not user:
             flash('Invalid username or password', 'danger')
@@ -159,10 +169,27 @@ def admin_dashboard():
 @login_required(role='admin')
 def admin_new_hospital():
     if request.method == 'POST':
-        username = request.form.get('username').strip()
-        display_name = request.form.get('display_name').strip()
-        password = request.form.get('password')
-        email = request.form.get('email','').strip()
+        username = request.form.get('username', '').strip()
+        display_name = request.form.get('display_name', '').strip()
+        password = request.form.get('password', '')
+        email = request.form.get('email', '').strip()
+
+        # Validation checks
+        if not username or len(username) < 3:
+            flash('Username must be at least 3 characters long', 'danger')
+            return redirect(url_for('admin_new_hospital'))
+        
+        if not display_name:
+            flash('Display name is required', 'danger')
+            return redirect(url_for('admin_new_hospital'))
+        
+        if not password or len(password) < 6:
+            flash('Password must be at least 6 characters long', 'danger')
+            return redirect(url_for('admin_new_hospital'))
+        
+        if email and '@' not in email:
+            flash('Valid email is required', 'danger')
+            return redirect(url_for('admin_new_hospital'))
 
         if hospitals_col.find_one({'username': username}):
             flash('Hospital username already exists', 'danger')
@@ -184,8 +211,18 @@ def admin_new_hospital():
 @app.route('/hospital/login', methods=['GET', 'POST'])
 def hospital_login():
     if request.method == 'POST':
-        username = request.form.get('username').strip()
-        password = request.form.get('password')
+        username = request.form.get('username', '').strip()
+        password = request.form.get('password', '')
+        
+        # Validation checks
+        if not username:
+            flash('Username is required', 'danger')
+            return redirect(url_for('hospital_login'))
+        
+        if not password:
+            flash('Password is required', 'danger')
+            return redirect(url_for('hospital_login'))
+        
         hospital = hospitals_col.find_one({'username': username})
         if not hospital:
             flash('Invalid credentials', 'danger')
@@ -213,13 +250,21 @@ def hospital_dashboard():
 @login_required(role='hospital')
 def hospital_upload():
     if request.method == 'POST':
+        # Validation checks
         if 'file' not in request.files:
             flash('No file part', 'danger')
             return redirect(request.url)
+        
         file = request.files['file']
-        if file.filename == '':
+        
+        if not file or file.filename == '' or file.filename is None:
             flash('No selected file', 'danger')
             return redirect(request.url)
+        
+        if not allowed_file(file.filename):
+            flash('Only CSV files are allowed', 'danger')
+            return redirect(request.url)
+        
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             save_path = os.path.join(app.config['UPLOAD_FOLDER'], f"{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')}_{filename}")
@@ -240,9 +285,6 @@ def hospital_upload():
             else:
                 flash('No valid records found in CSV.', 'warning')
             return redirect(url_for('hospital_dashboard'))
-        else:
-            flash('Only CSV files are allowed', 'danger')
-            return redirect(request.url)
     return render_template('hospital/upload.html')
 
 @app.route('/search', methods=['GET', 'POST'])
@@ -253,6 +295,12 @@ def search():
 
     if request.method == 'POST':
         organ = request.form.get('organ', '').strip()
+        
+        # Validation checks
+        if not organ:
+            flash('Please select an organ to search for', 'danger')
+            return redirect(url_for('search'))
+        
         user = users_col.find_one({'username': session['user']})
         if not user:
             flash('User data not found. Please login again.', 'danger')
