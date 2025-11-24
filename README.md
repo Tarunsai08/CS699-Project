@@ -47,8 +47,8 @@ Installation and Setup
 Clone the repository
 Download the project source code to your local machine.
 
-git clone [https://github.com/yourusername/organ-donation-mapper.git](https://github.com/yourusername/organ-donation-mapper.git)
-cd organ-donation-mapper
+git clone https://github.com/Tarunsai08/CS699-Project
+cd CS699-Project
 
 
 Create a Virtual Environment
