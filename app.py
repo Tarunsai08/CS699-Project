@@ -51,17 +51,60 @@ def index():
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
-        username = request.form.get('username').strip()
-        password = request.form.get('password')
-        name = request.form.get('name','').strip()
-        email = request.form.get('email','').strip()
-        phone = request.form.get('phone','').strip()
-        city = request.form.get('city','').strip()
-        age = int(request.form['age'])
-        blood_group = request.form['blood_group'].strip()
+        username = request.form.get('username', '').strip()
+        password = request.form.get('password', '')
+        name = request.form.get('name', '').strip()
+        email = request.form.get('email', '').strip()
+        phone = request.form.get('phone', '').strip()
+        city = request.form.get('city', '').strip()
+        age = request.form.get('age', '').strip()
+        blood_group = request.form.get('blood_group', '').strip()
+
+        # Validation checks
+        if not username or len(username) < 3:
+            flash('Username must be at least 3 characters long', 'danger')
+            return redirect(url_for('signup'))
+        
+        if not password or len(password) < 6:
+            flash('Password must be at least 6 characters long', 'danger')
+            return redirect(url_for('signup'))
+        
+        if not name:
+            flash('Name is required', 'danger')
+            return redirect(url_for('signup'))
+        
+        if not email or '@' not in email:
+            flash('Valid email is required', 'danger')
+            return redirect(url_for('signup'))
+        
+        if not phone or not phone.isdigit() or len(phone) < 10:
+            flash('Valid phone number (at least 10 digits) is required', 'danger')
+            return redirect(url_for('signup'))
+        
+        if not city:
+            flash('City is required', 'danger')
+            return redirect(url_for('signup'))
+        
+        try:
+            age_int = int(age)
+            if age_int < 18 or age_int > 120:
+                flash('Age must be between 18 and 120', 'danger')
+                return redirect(url_for('signup'))
+        except (ValueError, TypeError):
+            flash('Valid age is required', 'danger')
+            return redirect(url_for('signup'))
+        
+        valid_blood_groups = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']
+        if not blood_group or blood_group not in valid_blood_groups:
+            flash('Valid blood group is required', 'danger')
+            return redirect(url_for('signup'))
 
         if users_col.find_one({'username': username}):
             flash('Username already exists', 'danger')
+            return redirect(url_for('signup'))
+        
+        if users_col.find_one({'email': email}):
+            flash('Email already registered', 'danger')
             return redirect(url_for('signup'))
 
         users_col.insert_one({
@@ -72,12 +115,13 @@ def signup():
             'phone': phone,
             'city': city,
             'role': 'user',
-            "age": age,
-            "blood_group": blood_group,
+            'age': age_int,
+            'blood_group': blood_group,
             'created_at': datetime.now(timezone.utc)
         })
         flash('Signup successful. Please login.', 'success')
         return redirect(url_for('login'))
+       
     return render_template('signup.html')
 
 @app.route('/login', methods=['GET', 'POST'])
