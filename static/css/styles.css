@@ -275,3 +275,37 @@ tr:last-child td {
     border-top: 1px solid #eee;
     background: #fff;
 }
+
+.btn-small {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+    border-radius: 6px;
+    text-decoration: none;
+    margin-right: 8px;
+    color: white;
+}
+
+.btn-small.info {
+    background: #2F80ED;
+}
+
+.btn-small.danger {
+    background: #e11d48;
+}
+
+.btn-small.warning {
+    background: #f59e0b;
+}
+
+.btn-small:hover {
+    opacity: 0.85;
+}
+
+.search-input {
+    padding: 10px 14px;
+    width: 250px;
+    border-radius: 8px;
+    border: 1px solid #d0d5dd;
+    font-size: 1rem;
+    margin-right: 10px;
+}

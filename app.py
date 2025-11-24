@@ -10,6 +10,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import seaborn as sns
+from bson import ObjectId
 
 app = Flask(__name__)
 app.secret_key = config.SECRET_KEY
@@ -162,8 +163,20 @@ def logout():
 @app.route('/admin/dashboard')
 @login_required(role='admin')
 def admin_dashboard():
-    hospitals = list(hospitals_col.find())
-    return render_template('admin/dashboard.html', hospitals=hospitals)
+    query = request.args.get('q', '').strip()
+
+    if query:
+        hospitals = list(hospitals_col.find({
+            '$or': [
+                {'username': {'$regex': query, '$options': 'i'}},
+                {'display_name': {'$regex': query, '$options': 'i'}},
+                {'email': {'$regex': query, '$options': 'i'}}
+            ]
+        }))
+    else:
+        hospitals = list(hospitals_col.find())
+
+    return render_template('admin/dashboard.html', hospitals=hospitals, query=query)
 
 @app.route('/admin/hospitals/new', methods=['GET', 'POST'])
 @login_required(role='admin')
@@ -208,6 +221,65 @@ def admin_new_hospital():
 
     return render_template('admin/new_hospital.html')
 
+@app.route('/admin/hospital/<hos_id>/edit', methods=['GET', 'POST'])
+@login_required(role='admin')
+def admin_edit_hospital(hos_id):
+    hospital = hospitals_col.find_one({'_id': ObjectId(hos_id)})
+    if not hospital:
+        flash('Hospital not found', 'danger')
+        return redirect(url_for('admin_dashboard'))
+
+    if request.method == 'POST':
+        display_name = request.form.get('display_name', '').strip()
+        email = request.form.get('email', '').strip()
+        username = request.form.get('username', '').strip()
+        password = request.form.get('password', '').strip()
+        existing = hospitals_col.find_one({'username': username, '_id': {'$ne': hospital['_id']}})
+        if existing:
+            flash('Username already in use.', 'danger')
+            return redirect(request.url)
+
+        if not display_name or not username:
+            flash('Username and Institution Name are required', 'danger')
+            return redirect(request.url)
+        
+
+
+        update_data = {
+            'display_name': display_name,
+            'email': email,
+            'username': username
+        }
+
+        if password:  
+            update_data['password_hash'] = generate_password_hash(password)
+
+        hospitals_col.update_one(
+            {'_id': ObjectId(hos_id)},
+            {'$set': update_data}
+        )
+
+        flash('Hospital updated successfully', 'success')
+        return redirect(url_for('admin_dashboard'))
+
+    return render_template('admin/edit_hospital.html', hospital=hospital)
+
+@app.route('/admin/hospital/<hos_id>/delete')
+@login_required(role='admin')
+def admin_delete_hospital(hos_id):
+    hospital = hospitals_col.find_one({'_id': ObjectId(hos_id)})
+    if not hospital:
+        flash('Hospital not found', 'danger')
+        return redirect(url_for('admin_dashboard'))
+
+    donors_col.delete_many({'hospital_id': hospital['_id']})
+
+    hospitals_col.delete_one({'_id': ObjectId(hos_id)})
+
+    flash('Hospital and all related donor records deleted.', 'info')
+    return redirect(url_for('admin_dashboard'))
+
+
 @app.route('/hospital/login', methods=['GET', 'POST'])
 def hospital_login():
     if request.method == 'POST':
@@ -233,6 +305,7 @@ def hospital_login():
         if check_password_hash(hospital['password_hash'], password):
             session['user'] = hospital['username']
             session['role'] = 'hospital'
+            session['hospital_id'] = str(hospital['_id'])
             session['hospital_display'] = hospital.get('display_name', hospital['username'])
             flash('Hospital logged in', 'success')
             return redirect(url_for('hospital_dashboard'))
@@ -243,8 +316,25 @@ def hospital_login():
 @login_required(role='hospital')
 def hospital_dashboard():
     hospital_username = session['user']
-    donors = list(donors_col.find({'hospital_name': hospital_username}))
-    return render_template('hospital/dashboard.html', donors=donors)
+    q = request.args.get('q', '').strip()
+
+    base_filter = {'hospital_id': ObjectId(session['hospital_id'])}
+
+    if q:
+        donors = list(donors_col.find({
+            '$and': [
+                base_filter,
+                {'$or': [
+                    {'Name': {'$regex': q, '$options': 'i'}},
+                    {'Organ': {'$regex': q, '$options': 'i'}},
+                    {'Blood_Type': {'$regex': q, '$options': 'i'}},
+                ]}
+            ]
+        }))
+    else:
+        donors = list(donors_col.find(base_filter))
+
+    return render_template('hospital/dashboard.html', donors=donors, query=q)
 
 @app.route('/hospital/upload', methods=['GET', 'POST'])
 @login_required(role='hospital')
@@ -276,7 +366,7 @@ def hospital_upload():
             prepared = []
             for rec in records:
                 doc = dict(rec)
-                doc['hospital_name'] = hospital_name
+                doc['hospital_id'] = ObjectId(session['hospital_id'])
                 doc['uploaded_at'] = now
                 prepared.append(doc)
             if prepared:
@@ -286,6 +376,57 @@ def hospital_upload():
                 flash('No valid records found in CSV.', 'warning')
             return redirect(url_for('hospital_dashboard'))
     return render_template('hospital/upload.html')
+
+@app.route('/hospital/donor/<donor_id>/edit', methods=['GET', 'POST'])
+@login_required(role='hospital')
+def hospital_edit_donor(donor_id):
+
+    donor = donors_col.find_one({'_id': ObjectId(donor_id)})
+    if not donor:
+        flash('Donor not found.', 'danger')
+        return redirect(url_for('hospital_dashboard'))
+
+    # Ensure this donor belongs to this hospital
+    if str(donor.get('hospital_id')) != session['hospital_id']:
+        flash('Access denied.', 'danger')
+        return redirect(url_for('hospital_dashboard'))
+
+    if request.method == 'POST':
+        updates = {}
+        for key in donor.keys():
+            if key not in ['_id', 'hospital_name', 'uploaded_at']:
+                value = request.form.get(key)
+                if value is not None:
+                    updates[key] = value
+        
+        donors_col.update_one(
+            {'_id': ObjectId(donor_id)},
+            {'$set': updates}
+        )
+
+        flash('Donor updated successfully.', 'success')
+        return redirect(url_for('hospital_dashboard'))
+
+    return render_template('hospital/edit_donor.html', donor=donor)
+
+@app.route('/hospital/donor/<donor_id>/delete')
+@login_required(role='hospital')
+def hospital_delete_donor(donor_id):
+
+    donor = donors_col.find_one({'_id': ObjectId(donor_id)})
+    if not donor:
+        flash('Donor not found.', 'danger')
+        return redirect(url_for('hospital_dashboard'))
+
+    if str(donor.get('hospital_id')) != session['hospital_id']:
+        flash('Access denied.', 'danger')
+        return redirect(url_for('hospital_dashboard'))
+
+    donors_col.delete_one({'_id': ObjectId(donor_id)})
+
+    flash('Donor deleted.', 'info')
+    return redirect(url_for('hospital_dashboard'))
+
 
 @app.route('/search', methods=['GET', 'POST'])
 def search():

@@ -7,6 +7,11 @@
 
   <div class="card">
     <h3>Registered Institutions</h3>
+    <form method="get" style="margin-bottom: 20px;">
+      <input type="text" name="q" placeholder="Search hospitals..." 
+             value="{{ query or '' }}" class="search-input">
+      <button class="btn" type="submit">Search</button>
+    </form>    
     <table>
       <thead>
         <tr>
@@ -16,6 +21,7 @@
           <th>Contact Email</th>
           <th>Status</th>
           <th>Registration Date</th>
+          <th>Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -27,6 +33,11 @@
           <td>{{ h.email or '' }}</td>
           <td>{{ 'Active' if h.active else 'Inactive' }}</td>
           <td>{{ h.created_at.strftime('%Y-%m-%d') if h.created_at else '' }}</td>
+          <td>
+            <a class="btn-small info" href="{{ url_for('admin_edit_hospital', hos_id=h._id) }}">Edit</a>
+            <a class="btn-small danger" href="{{ url_for('admin_delete_hospital', hos_id=h._id) }}"
+               onclick="return confirm('Are you sure you want to delete this hospital?')">Delete</a>
+          </td>
         </tr>
         {% endfor %}
       </tbody>

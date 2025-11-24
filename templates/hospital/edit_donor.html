@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="card form-card">
+  <h2>Edit Donor Record</h2>
+
+  <form method="post">
+    {% for k, v in donor.items() %}
+      {% if k not in ['_id','uploaded_at','hospital_name', 'hospital_id'] %}
+        <label>{{ k }}
+          <input name="{{ k }}" value="{{ v }}">
+        </label>
+      {% endif %}
+    {% endfor %}
+
+    <div class="form-actions">
+      <button class="btn" type="submit">Update</button>
+      <a class="link" href="{{ url_for('hospital_dashboard') }}">Cancel</a>
+    </div>
+  </form>
+</div>
+
+{% endblock %}

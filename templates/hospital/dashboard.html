@@ -7,31 +7,43 @@
 
   <div class="card">
     <h3>Donor Registry</h3>
+    <form method="get" style="margin-bottom: 20px;">
+      <input type="text" name="q" placeholder="Search donors..." 
+             value="{{ query or '' }}" class="search-input">
+      <button class="btn" type="submit">Search</button>
+    </form>    
     <table>
       <thead>
         <tr>
           <th>#</th>
           {% if donors %}
             {% for k in donors[0].keys() %}
-              {% if k not in ['_id','uploaded_at', 'hospital_name'] %}
+              {% if k not in ['_id','uploaded_at', 'hospital_name', 'hospital_id'] %}
                 <th>{{ k }}</th>
               {% endif %}
             {% endfor %}
             <th>Date Added</th>
+            <th>Actions</th>
           {% endif %}
         </tr>
       </thead>
       <tbody>
         {% for d in donors %}
-          <tr>
-            <td>{{ loop.index }}</td>
-            {% for k, v in d.items() %}
-              {% if k not in ['_id','uploaded_at', 'hospital_name'] %}
-                <td>{{ v }}</td>
-              {% endif %}
-            {% endfor %}
-            <td>{{ d.uploaded_at.strftime('%Y-%m-%d %H:%M') if d.uploaded_at else '-' }}</td>
-          </tr>
+        <tr>
+          <td>{{ loop.index }}</td>
+          {% for k, v in d.items() %}
+            {% if k not in ['_id','uploaded_at','hospital_name', 'hospital_id'] %}
+              <td>{{ v }}</td>
+            {% endif %}
+          {% endfor %}
+          <td>{{ d.uploaded_at.strftime('%Y-%m-%d %H:%M') if d.uploaded_at else '-' }}</td>
+          <td>
+            <a class="btn-small info" href="{{ url_for('hospital_edit_donor', donor_id=d._id) }}">Edit</a>
+            <a class="btn-small danger"
+               href="{{ url_for('hospital_delete_donor', donor_id=d._id) }}"
+               onclick="return confirm('Delete this donor?')">Delete</a>
+          </td>
+        </tr>
         {% endfor %}
       </tbody>
     </table>
