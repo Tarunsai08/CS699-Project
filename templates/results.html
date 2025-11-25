@@ -34,16 +34,17 @@
 
         {% if matches %}
         <div class="results-table">
-            <table>
+            <table role="table" aria-label="Search results showing matched organ donors">
                 <thead>
                     <tr>
-                        <th>Rank</th>
-                        <th>Score</th>
-                        <th>Viability Window</th> <th>Blood Type</th>
-                        <th>Age</th>
-                        <th>Organ</th>
-                        <th>Source</th>
-                        <th>Uploaded</th>
+                        <th scope="col">Rank</th>
+                        <th scope="col">Score</th>
+                        <th scope="col">Viability Window</th>
+                        <th scope="col">Blood Type</th>
+                        <th scope="col">Age</th>
+                        <th scope="col">Organ</th>
+                        <th scope="col">Source</th>
+                        <th scope="col">Uploaded</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -51,15 +52,15 @@
                     <tr>
                         <td><strong>#{{ loop.index }}</strong></td>
                         <td>
-                            <span style="color: var(--accent); font-weight: bold;">
+                            <span style="color: var(--accent); font-weight: bold;" aria-label="Compatibility score {{ m._score | round(1) }}">
                                 {{ m._score | round(1) }}
                             </span>
                         </td>
                         <td>
                             {% if '0 days' in m.days_left_display %}
-                                <span class="badge low">{{ m.days_left_display }}</span>
+                                <span class="badge low" role="status" aria-label="Low viability: {{ m.days_left_display }}">{{ m.days_left_display }}</span>
                             {% else %}
-                                <span class="badge high">{{ m.days_left_display }}</span>
+                                <span class="badge high" role="status" aria-label="High viability: {{ m.days_left_display }}">{{ m.days_left_display }}</span>
                             {% endif %}
                         </td>
                         <td>{{ m.Blood_Type }}</td>
@@ -67,7 +68,7 @@
                         <td>{{ m.Organ }}</td>
                         <td>{{ m.hospital_display }}</td>
                         <td style="font-size: 0.85em; color: var(--muted);">
-                            {{ m.uploaded_at_display }}
+                            <time datetime="{{ m.uploaded_at_display }}">{{ m.uploaded_at_display }}</time>
                         </td>
                     </tr>
                     {% endfor %}

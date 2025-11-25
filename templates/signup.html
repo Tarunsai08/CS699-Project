@@ -1,27 +1,45 @@
 {% extends 'base.html' %}
 {% block content %}
   <div class="card form-card">
-    <h2>User Registration</h2>
-    <form method="post">
-      <label>Username<input name="username" required></label>
-      <label>Password<input type="password" name="password" required></label>
-      <label>Full Name<input name="name"></label>
-      <label>Email Address<input name="email" type="email"></label>
-      <label>Phone Number<input name="phone"></label>
-      <label>City / Region<input name="city"></label>
-      <label>Age<input type="number" name="age" required></label>
-      <label>Blood Group
-        <select name="blood_group" required>
+    <h2 id="form-title">User Registration</h2>
+    <form method="post" aria-labelledby="form-title" novalidate>
+      <label for="username">Username <span aria-label="required">*</span>
+        <input id="username" name="username" type="text" required aria-required="true" autocomplete="username" minlength="3">
+      </label>
+      <label for="password">Password <span aria-label="required">*</span>
+        <input id="password" name="password" type="password" required aria-required="true" autocomplete="new-password" minlength="6" aria-describedby="password-hint">
+        <small id="password-hint" class="form-hint">Must be at least 6 characters</small>
+      </label>
+      <label for="name">Full Name
+        <input id="name" name="name" type="text" autocomplete="name">
+      </label>
+      <label for="email">Email Address
+        <input id="email" name="email" type="email" autocomplete="email" aria-describedby="email-hint">
+        <small id="email-hint" class="form-hint">We'll never share your email</small>
+      </label>
+      <label for="phone">Phone Number
+        <input id="phone" name="phone" type="tel" autocomplete="tel" pattern="[0-9]{10,15}" aria-describedby="phone-hint">
+        <small id="phone-hint" class="form-hint">Enter 10-15 digits</small>
+      </label>
+      <label for="city">City / Region
+        <input id="city" name="city" type="text" autocomplete="address-level2">
+      </label>
+      <label for="age">Age <span aria-label="required">*</span>
+        <input id="age" name="age" type="number" required aria-required="true" min="18" max="120" aria-describedby="age-hint">
+        <small id="age-hint" class="form-hint">Must be between 18 and 120</small>
+      </label>
+      <label for="blood_group">Blood Group <span aria-label="required">*</span>
+        <select id="blood_group" name="blood_group" required aria-required="true">
           <option value="">Select Blood Group</option>
-          <option>A+</option><option>A-</option>
-          <option>B+</option><option>B-</option>
-          <option>O+</option><option>O-</option>
-          <option>AB+</option><option>AB-</option>
+          <option value="A+">A+</option><option value="A-">A-</option>
+          <option value="B+">B+</option><option value="B-">B-</option>
+          <option value="O+">O+</option><option value="O-">O-</option>
+          <option value="AB+">AB+</option><option value="AB-">AB-</option>
         </select>
       </label>
       <div class="form-actions">
         <button class="btn" type="submit">Complete Registration</button>
-        <button class="btn" type="button" onclick="window.location.href='{{ url_for('login') }}'">Existing user? Login here</button>
+        <button class="btn" type="button" onclick="window.location.href='{{ url_for('login') }}'" aria-label="Navigate to login page">Existing user? Login here</button>
       </div>
     </form>
   </div>

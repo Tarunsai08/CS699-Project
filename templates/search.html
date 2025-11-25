@@ -1,11 +1,14 @@
 {% extends 'base.html' %}
 {% block content %}
   <div class="card form-card">
-    <h2>Donor Database Search</h2>
-    <form method="post">
-      <label>Target Organ<input name="organ" placeholder="Enter organ type (e.g., Kidney, Liver)"></label>
+    <h2 id="search-title">Donor Database Search</h2>
+    <form method="post" aria-labelledby="search-title">
+      <label for="organ">Target Organ <span aria-label="required">*</span>
+        <input id="organ" name="organ" type="text" placeholder="Enter organ type (e.g., Kidney, Liver)" required aria-required="true" aria-describedby="organ-hint">
+        <small id="organ-hint" class="form-hint">Enter the type of organ you are searching for</small>
+      </label>
       <div class="form-actions">
-        <button class="btn" type="submit">Search Database</button>
+        <button class="btn" type="submit" aria-label="Search for organ donors">Search Database</button>
       </div>
     </form>
   </div>
