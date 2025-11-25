@@ -12,6 +12,10 @@ Organ Donation Mapper is a centralized web platform designed to facilitate the c
   * **Viability Scoring:** Ranks matches by compatibility, age proximity, and data freshness.  
 * **Data Visualization:** Generates dynamic charts (Bar, Line, Pie) for match statistics.  
 * **Admin Dashboard:** Centralized management for hospital credentialing.
+* **Automatic Donor Allocation:** Once approved, system picks best donor using same scoring logic as search.
+* **Donor Locking:** Allocated donors are hidden from search/hospital dashboards.
+* **User Request Tracking:** Users can see matched donor name + hospital name.
+* **Admin Request Panel:** Admin can approve or reject a Request raised by users.
 
 ## **Technical Stack**
 
@@ -52,7 +56,6 @@ pip install \-r requirements.txt
 **UPLOAD\_FOLDER=uploads**  
 **ADMIN\_USERNAME=admin**  
 **ADMIN\_PASSWORD=admin**  
-**\# WnZgLuK9MBsWKCeV**
 
 **5\. Run the Application**  
 python app.py
@@ -65,6 +68,7 @@ Access the app at http://127.0.0.1:5000.
 
 * **Login:** Use the credentials from your config file.  
 * **Role:** Register new Hospital accounts.
+* **Approve Requests:** Approve or Reject the Requests made by the user.
 
 ### **Hospital**
 
@@ -76,21 +80,34 @@ Access the app at http://127.0.0.1:5000.
 
 * **Signup:** Register with your Age and Blood Group.  
 * **Search:** Enter a target organ (e.g., Kidney) to see ranked matches.
+* **Request:** Raise a Request for the Target organ required
 
 ## **Project Structure**
 
-organ-donation-mapper/  
-├── app.py              \# Main Flask application  
-├── config.py           \# Configuration variables  
-├── helpers.py          \# CSV parsing & admin utilities  
-├── requirements.txt    \# Python dependencies  
-├── static/             \# CSS & Images  
-│   └── css/  
-│       └── styles.css  
-├── templates/          \# HTML Templates  
-│   ├── base.html  
-│   ├── index.html  
-│   ├── login.html  
-│   ├── search.html  
-│   └── ... (other templates)  
-└── uploads/            \# Storage for charts/CSVs  
+```
+organ-donation-mapper/
+├── app.py
+├── config.py
+├── helpers.py
+├── requirements.txt
+├── static/
+│   └── css/styles.css
+├── templates/
+│   ├── admin/
+│   │   ├── dashboard.html
+│   │   ├── edit_hospital.html
+│   │   ├── requests.html
+│   ├── hospital/
+│   │   ├── dashboard.html
+│   │   ├── upload.html
+│   │   ├── edit_donor.html
+│   ├── user/
+│   │   ├── request_organ.html
+│   │   ├── my_requests.html
+│   ├── results.html
+│   ├── search.html
+│   ├── login.html
+│   ├── signup.html
+│   ├── index.html
+└── uploads/
+```
