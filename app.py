@@ -595,9 +595,9 @@ def search():
                     
                     days_left = 25 - days_elapsed
                     if days_left > 0:
-                        c['days_left_display'] = f"{days_left} days"
+                        c['days_left_display'] = f"{days_left} Hours"
                     else:
-                        c['days_left_display'] = "0 days (Low Viability)"
+                        c['days_left_display'] = "0 Hours (Low Viability)"
             except:
                 c['days_left_display'] = "Unknown"
 
