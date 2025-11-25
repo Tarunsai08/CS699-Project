@@ -1,44 +1,23 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Search Results</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-</head>
-<body>
-
-    <header class="site-header">
-        <div class="container">
-            <a href="{{ url_for('index') }}" class="brand">
-                <div class="logo">OD</div>
-                OrganDonation
-            </a>
-            <nav class="main-nav">
-                <a href="{{ url_for('index') }}">Home</a>
-                <a href="{{ url_for('logout') }}">Logout</a>
-            </nav>
-        </div>
-    </header>
-
-    <div class="container" style="margin-top: 30px;">
+{% extends 'base.html' %}
+{% block content %}
+    <div style="margin-top: 30px;">
         <h2>Search Results</h2>
-        <p style="color: #666;">
+        <p style="color: var(--muted);">
             Criteria: <strong>{{ user_blood }}</strong> | Age: {{ user_age }}
         </p>
 
         <div class="features" style="margin-bottom: 30px;">
             <div class="card">
                 <h3 style="font-size: 2em; margin-bottom: 5px; color: var(--accent);">{{ metrics.total_matches }}</h3>
-                <span style="color: #666;">Total Donors</span>
+                <span style="color: var(--muted);">Total Donors</span>
             </div>
             <div class="card">
                 <h3 style="font-size: 2em; margin-bottom: 5px; color: var(--accent);">{{ metrics.best_score }}</h3>
-                <span style="color: #666;">Top Compatibility Score</span>
+                <span style="color: var(--muted);">Top Compatibility Score</span>
             </div>
             <div class="card">
                 <h3 style="font-size: 2em; margin-bottom: 5px; color: var(--accent);">{{ metrics.same_blood_count }}</h3>
-                <span style="color: #666;">Exact Blood Matches</span>
+                <span style="color: var(--muted);">Exact Blood Matches</span>
             </div>
         </div>
 
@@ -87,7 +66,7 @@
                         <td>{{ m.Age }}</td>
                         <td>{{ m.Organ }}</td>
                         <td>{{ m.hospital_display }}</td>
-                        <td style="font-size: 0.85em; color: #666;">
+                        <td style="font-size: 0.85em; color: var(--muted);">
                             {{ m.uploaded_at_display }}
                         </td>
                     </tr>
@@ -103,8 +82,4 @@
         </div>
         {% endif %}
     </div>
-
-    
-
-</body>
-</html>
+{% endblock %}
