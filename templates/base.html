@@ -25,6 +25,9 @@
             <a href="{{ url_for('admin_dashboard') }}">Admin</a>
           {% elif session.role == 'hospital' %}
             <a href="{{ url_for('hospital_dashboard') }}">Hospital</a>
+          {% else %}
+          <a href="{{ url_for('request_organ') }}">Request Organ</a>
+          <a href="{{ url_for('my_requests') }}">My Requests</a>
           {% endif %}
           <a href="{{ url_for('logout') }}">Logout ({{ session.user }})</a>
         {% endif %}

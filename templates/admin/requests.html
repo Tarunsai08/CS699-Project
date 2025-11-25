@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Organ Requests</h2>
+
+<div class="card">
+  <table>
+    <thead>
+      <tr>
+        <th>User</th>
+        <th>Organ</th>
+        <th>Status</th>
+        <th>Requested On</th>
+        <th>Approve</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in reqs %}
+      <tr>
+        <td>{{ r.user.name }}</td>
+        <td>{{ r.organ }}</td>
+        <td>
+          <div class="badge badge-{{ r.status }}">
+              {{ r.status }}
+          </div>
+        </td>
+        <td>{{ r.created_at.strftime('%Y-%m-%d') }}</td>
+        <td>
+          {% if r.status == 'pending' %}
+          <form method="post" action="{{ url_for('admin_handle_request_action', req_id=r._id) }}" style="display:inline;">
+              <input type="hidden" name="action" value="approve">
+              <button class="btn-approve">Approve</button>
+          </form>
+
+          <form method="post" action="{{ url_for('admin_handle_request_action', req_id=r._id) }}" style="display:inline;">
+              <input type="hidden" name="action" value="reject">
+              <button class="btn-reject">Reject</button>
+          </form>
+          {% else %}
+          -
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

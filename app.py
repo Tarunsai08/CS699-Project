@@ -23,8 +23,12 @@ db = client[config.DB_NAME]
 users_col = db['users']       
 hospitals_col = db['hospitals']
 donors_col = db['donors']
+organ_requests_col = db['organ_requests']
 
 ensure_admin_exists(users_col, config.ADMIN_USERNAME, config.ADMIN_PASSWORD)
+
+def now_utc():
+    return datetime.now(timezone.utc)
 
 def login_required(role=None):
     def decorator(f):
@@ -118,7 +122,7 @@ def signup():
             'role': 'user',
             'age': age_int,
             'blood_group': blood_group,
-            'created_at': datetime.now(timezone.utc)
+            'created_at': now_utc()
         })
         flash('Signup successful. Please login.', 'success')
         return redirect(url_for('login'))
@@ -214,7 +218,7 @@ def admin_new_hospital():
             'password_hash': generate_password_hash(password),
             'email': email,
             'active': True,
-            'created_at': datetime.now(timezone.utc)
+            'created_at': now_utc()
         })
         flash('Hospital created', 'success')
         return redirect(url_for('admin_dashboard'))
@@ -279,6 +283,57 @@ def admin_delete_hospital(hos_id):
     flash('Hospital and all related donor records deleted.', 'info')
     return redirect(url_for('admin_dashboard'))
 
+@app.route('/admin/requests/<req_id>/action', methods=['POST'])
+@login_required(role='admin')
+def admin_handle_request_action(req_id):
+    action = request.form.get('action')   
+    req = organ_requests_col.find_one({'_id': ObjectId(req_id)})
+
+    if not req:
+        flash("Request not found.", "danger")
+        return redirect(url_for('admin_requests'))
+
+    if action == "reject":
+        organ_requests_col.update_one(
+            {'_id': req['_id']},
+            {'$set': {'status': 'rejected', 'updated_at': now_utc()}}
+        )
+        flash("Request rejected.", "info")
+        return redirect(url_for('admin_requests'))
+
+    if action == "approve":
+        organ_requests_col.update_one(
+            {'_id': req['_id']},
+            {'$set': {'status': 'approved', 'updated_at': now_utc()}}
+        )
+
+        best_donor, best_score = allocate_for_request(req)
+
+        if best_donor:
+            flash("Organ successfully allocated.", "success")
+        else:
+            flash("No suitable donor found. Request marked as failed.", "warning")
+
+        return redirect(url_for('admin_requests'))
+
+    flash("Invalid action.", "danger")
+    return redirect(url_for('admin_requests'))
+
+@app.route('/admin/requests')
+@login_required(role='admin')
+def admin_requests():
+    reqs = list(organ_requests_col.find().sort('created_at', -1))
+
+    user_ids = list({r['user_id'] for r in reqs})
+    user_map = {
+        u['_id']: u
+        for u in users_col.find({'_id': {'$in': user_ids}})
+    }
+
+    for r in reqs:
+        r['user'] = user_map.get(r['user_id'])
+
+    return render_template('admin/requests.html', reqs=reqs)
 
 @app.route('/hospital/login', methods=['GET', 'POST'])
 def hospital_login():
@@ -315,10 +370,9 @@ def hospital_login():
 @app.route('/hospital/dashboard')
 @login_required(role='hospital')
 def hospital_dashboard():
-    hospital_username = session['user']
     q = request.args.get('q', '').strip()
 
-    base_filter = {'hospital_id': ObjectId(session['hospital_id'])}
+    base_filter = {'hospital_id': ObjectId(session['hospital_id']),'is_allocated': {'$ne': True}}
 
     if q:
         donors = list(donors_col.find({
@@ -357,17 +411,20 @@ def hospital_upload():
         
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
-            save_path = os.path.join(app.config['UPLOAD_FOLDER'], f"{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')}_{filename}")
+            save_path = os.path.join(app.config['UPLOAD_FOLDER'], f"{now_utc().strftime('%Y%m%d%H%M%S')}_{filename}")
             file.save(save_path)
 
             records = parse_csv_preserve_fields(save_path)
             hospital_name = session['user']
-            now = datetime.now(timezone.utc)
+            now = now_utc()
             prepared = []
             for rec in records:
                 doc = dict(rec)
                 doc['hospital_id'] = ObjectId(session['hospital_id'])
                 doc['uploaded_at'] = now
+                doc['is_allocated'] = False
+                doc['allocated_to_request_id'] = None
+                doc['allocated_at'] = None
                 prepared.append(doc)
             if prepared:
                 donors_col.insert_many(prepared)
@@ -393,12 +450,14 @@ def hospital_edit_donor(donor_id):
 
     if request.method == 'POST':
         updates = {}
+        protected_fields = ['_id', 'hospital_id', 'uploaded_at',
+                            'is_allocated', 'allocated_to_request_id', 'allocated_at']
         for key in donor.keys():
-            if key not in ['_id', 'hospital_name', 'uploaded_at']:
+            if key not in protected_fields:
                 value = request.form.get(key)
                 if value is not None:
                     updates[key] = value
-        
+
         donors_col.update_one(
             {'_id': ObjectId(donor_id)},
             {'$set': updates}
@@ -409,23 +468,48 @@ def hospital_edit_donor(donor_id):
 
     return render_template('hospital/edit_donor.html', donor=donor)
 
-@app.route('/hospital/donor/<donor_id>/delete')
-@login_required(role='hospital')
-def hospital_delete_donor(donor_id):
+def score_match(doc, user_age, user_blood, valid_donor_groups):
+    s = 0
+    try:
+        doc_bg = str(doc.get('Blood_Type', '')).strip()
+        if doc_bg and doc_bg.lower() == user_blood.lower():
+            s += 150
+        elif doc_bg in valid_donor_groups:
+            s += 100
+        else:
+            return -1
+    except:
+        pass
+    
+    try:
+        doc_age = int(doc.get('Age'))
+        age_diff = abs(doc_age - user_age)
+        s += max(0, 60 - (age_diff * 2))
+    except:
+        pass
 
-    donor = donors_col.find_one({'_id': ObjectId(donor_id)})
-    if not donor:
-        flash('Donor not found.', 'danger')
-        return redirect(url_for('hospital_dashboard'))
+    try:
+        ua = doc.get('uploaded_at')
+        if ua:
+            if isinstance(ua, str):
+                try:
+                    ua = datetime.fromisoformat(ua)
+                except:
+                    ua = None
+            if ua:
+                if not ua.tzinfo:
+                    ua = ua.replace(tzinfo=timezone.utc)
+                else:
+                    ua = ua.astimezone(timezone.utc)
+                
+                now_time = now_utc()
+                days_elapsed = (now_time - ua).days
+                viability = max(0, 50 - (days_elapsed * 2))
+                s += viability
+    except:
+        pass
 
-    if str(donor.get('hospital_id')) != session['hospital_id']:
-        flash('Access denied.', 'danger')
-        return redirect(url_for('hospital_dashboard'))
-
-    donors_col.delete_one({'_id': ObjectId(donor_id)})
-
-    flash('Donor deleted.', 'info')
-    return redirect(url_for('hospital_dashboard'))
+    return s
 
 
 @app.route('/search', methods=['GET', 'POST'])
@@ -488,52 +572,12 @@ def search():
         if valid_donor_groups:
             query['Blood_Type'] = {'$in': valid_donor_groups}
         query['Age'] = {'$gte': age_min, '$lte': age_max}
+        query['is_allocated'] = {'$ne': True}
 
         candidates = list(donors_col.find(query).limit(2000)) 
 
-        def score_match(doc):
-            s = 0
-            try:
-                doc_bg = str(doc.get('Blood_Type', '')).strip()
-                if doc_bg and doc_bg.lower() == user_blood.lower():
-                    s += 150
-                elif doc_bg in valid_donor_groups:
-                    s += 100
-            except:
-                pass
-            
-            try:
-                doc_age = int(doc.get('Age'))
-                age_diff = abs(doc_age - user_age)
-                s += max(0, 60 - (age_diff * 2))
-            except:
-                pass
-
-            try:
-                ua = doc.get('uploaded_at')
-                if ua:
-                    if isinstance(ua, str):
-                        try:
-                            ua = datetime.fromisoformat(ua)
-                        except:
-                            ua = None
-                    if ua:
-                        if not ua.tzinfo:
-                            ua = ua.replace(tzinfo=timezone.utc)
-                        else:
-                            ua = ua.astimezone(timezone.utc)
-                        
-                        now_utc = datetime.now(timezone.utc)
-                        days_elapsed = (now_utc - ua).days
-                        viability = max(0, 50 - (days_elapsed * 2))
-                        s += viability
-            except:
-                pass
-
-            return s
-
         for c in candidates:
-            c['_score'] = score_match(c)
+            c['_score'] = score_match(c, user_age, user_blood, valid_donor_groups)
             
             c['days_left_display'] = "Expired"
             try:
@@ -546,8 +590,8 @@ def search():
                     else:
                         ua = ua.astimezone(timezone.utc)
                     
-                    now_utc = datetime.now(timezone.utc)
-                    days_elapsed = (now_utc - ua).days
+                    current_time = now_utc()
+                    days_elapsed = (current_time - ua).days
                     
                     days_left = 25 - days_elapsed
                     if days_left > 0:
@@ -577,6 +621,17 @@ def search():
             avg_age = round(sum(ages)/len(ages), 1)
         age_range_str = f"{age_min} - {age_max}"
 
+        hospital_ids = list({m['hospital_id'] for m in matches if 'hospital_id' in m})
+        hospital_map = {
+            str(h['_id']): h
+            for h in hospitals_col.find({'_id': {'$in': hospital_ids}})
+        }
+
+        for m in matches:
+            hid = str(m.get('hospital_id'))
+            hospital = hospital_map.get(hid)
+            m['hospital_display'] = hospital['display_name'] if hospital else 'Unknown'
+
         metrics = {
             'total_matches': total_matches,
             'best_score': best_score,
@@ -587,7 +642,7 @@ def search():
         }
 
         os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-        timestamp = int(datetime.now(timezone.utc).timestamp())
+        timestamp = int(now_utc().timestamp())
 
         charts = []  
 
@@ -596,7 +651,11 @@ def search():
             names = []
             scores = []
             for m in matches[:top_n]:
-                lbl = m.get('Name') or m.get('name') or (m.get('hospital_name','') + '_' + str(m.get('_id',''))) 
+                lbl = (
+                    m.get('Name')
+                    or m.get('name')
+                    or (m.get('hospital_display', '') + '_' + str(m.get('_id', '')))
+                )
                 names.append(lbl if len(lbl)<=20 else lbl[:18] + '..')
                 scores.append(m.get('_score', 0))
 
@@ -697,6 +756,175 @@ def search():
         return render_template('results.html', matches=matches, charts=charts, metrics=metrics, user_age=user_age, user_blood=user_blood)
 
     return render_template('search.html')
+
+def allocate_for_request(request_doc):
+    """
+    request_doc: a document from organ_requests_col
+    Returns: (best_donor, best_score) or (None, None)
+    """
+
+    organ = request_doc.get('organ')
+    user_id = request_doc.get('user_id')
+    user = users_col.find_one({'_id': user_id})
+    if not user:
+        return None, None
+
+    try:
+        user_age = int(user.get('age'))
+    except:
+        return None, None
+
+    user_blood = user.get('blood_group', '').strip()
+    if not user_blood:
+        return None, None
+
+    BLOOD_COMPATIBILITY = {
+        "O-": ["O-"],
+        "O+": ["O-", "O+"],
+        "A-": ["A-", "O-"],
+        "A+": ["A+", "A-", "O+", "O-"],
+        "B-": ["B-", "O-"],
+        "B+": ["B+", "B-", "O+", "O-"],
+        "AB-": ["AB-", "A-", "B-", "O-"],
+        "AB+": ["AB+", "AB-", "A+", "A-", "B+", "B-", "O+", "O-"]
+    }
+    valid_donor_groups = BLOOD_COMPATIBILITY.get(user_blood, [])
+
+    ORGAN_AGE_TOLERANCES = {
+        "Kidney": 15,
+        "Liver": 20,
+        "Heart": 10,
+        "Lung": 10,
+        "Cornea": 40,
+        "Pancreas": 15,
+        "Default": 10
+    }
+    tol = ORGAN_AGE_TOLERANCES.get(organ.title(), ORGAN_AGE_TOLERANCES['Default'])
+    age_min = max(0, user_age - tol)
+    age_max = user_age + tol
+
+    # Only available donors, not yet allocated
+    query = {
+        'Organ': {'$regex': f'^{organ}$', '$options': 'i'},
+        'Blood_Type': {'$in': valid_donor_groups},
+        'Age': {'$gte': age_min, '$lte': age_max},
+        'is_allocated': {'$ne': True}
+    }
+
+    candidates = list(donors_col.find(query).limit(2000))
+
+    best_donor = None
+    best_score = -1
+
+    for d in candidates:
+        s = score_match(d, user_age, user_blood, valid_donor_groups)
+        if s > best_score:
+            best_score = s
+            best_donor = d
+
+    if not best_donor or best_score < 0:
+        # Mark request as failed
+        organ_requests_col.update_one(
+            {'_id': request_doc['_id']},
+            {'$set': {
+                'status': 'failed',
+                'updated_at': now_utc()
+            }}
+        )
+        return None, None
+
+    # MARK DONOR AS ALLOCATED
+    donors_col.update_one(
+        {'_id': best_donor['_id']},
+        {'$set': {
+            'is_allocated': True,
+            'allocated_to_request_id': request_doc['_id'],
+            'allocated_at': now_utc()
+        }}
+    )
+
+    # MARK REQUEST AS MATCHED
+    organ_requests_col.update_one(
+        {'_id': request_doc['_id']},
+        {'$set': {
+            'status': 'matched',
+            'matched_donor_id': best_donor['_id'],
+            'match_score': best_score,
+            'updated_at': now_utc()
+        }}
+    )
+
+    return best_donor, best_score
+
+@app.route('/request-organ', methods=['GET', 'POST'])
+@login_required(role='user')
+def request_organ():
+    if request.method == 'POST':
+        organ = request.form.get('organ', '').strip()
+
+        if not organ:
+            flash('Please select an organ.', 'danger')
+            return redirect(request.url)
+
+        req = {
+            'user_id': users_col.find_one({'username': session['user']})['_id'],
+            'organ': organ,
+            'status': 'pending',
+            'created_at': now_utc(),
+            'updated_at': now_utc()
+        }
+
+        organ_requests_col.insert_one(req)
+        flash('Organ request submitted. Await admin approval.', 'success')
+        return redirect(url_for('my_requests'))
+
+    return render_template('request_organ.html')
+
+@app.route('/my-requests')
+@login_required(role='user')
+def my_requests():
+    user = users_col.find_one({'username': session['user']})
+    reqs = list(organ_requests_col.find({'user_id': user['_id']}))
+    donor_ids = [
+        req['matched_donor_id']
+        for req in reqs
+        if req.get('matched_donor_id')
+    ]
+
+    donor_ids = [ObjectId(d) for d in donor_ids]
+    donor_map = {
+        str(d['_id']): d
+        for d in donors_col.find({'_id': {'$in': donor_ids}})
+    }
+
+    hospital_ids = list({
+        d['hospital_id']
+        for d in donor_map.values()
+        if d.get('hospital_id')
+    })
+
+    hospital_map = {
+        str(h['_id']): h
+        for h in hospitals_col.find({'_id': {'$in': hospital_ids}})
+    }
+
+    for req in reqs:
+        donor_id = req.get('matched_donor_id')
+        if donor_id:
+            donor = donor_map.get(str(donor_id))
+            if donor:
+                req['donor_name'] = donor.get('Name', 'Unknown Donor')
+                req['donor_blood'] = donor.get('Blood_Type', '-')
+                req['donor_age'] = donor.get('Age', '-')
+
+                hospital = hospital_map.get(str(donor.get('hospital_id')))
+                req['hospital_name'] = hospital.get('display_name') if hospital else "Unknown Hospital"
+            else:
+                req['donor_name'] = "Unknown Donor"
+                req['hospital_name'] = "Unknown Hospital"
+
+    return render_template('my_requests.html', reqs=reqs)
+
 
 @app.route('/uploads/<path:filename>')
 def uploaded_file(filename):

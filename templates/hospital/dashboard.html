@@ -18,7 +18,7 @@
           <th>#</th>
           {% if donors %}
             {% for k in donors[0].keys() %}
-              {% if k not in ['_id','uploaded_at', 'hospital_name', 'hospital_id'] %}
+              {% if k not in ['_id','uploaded_at', 'hospital_name', 'hospital_id', 'is_allocated', 'allocated_to_request_id', 'allocated_at'] %}
                 <th>{{ k }}</th>
               {% endif %}
             {% endfor %}
@@ -32,16 +32,13 @@
         <tr>
           <td>{{ loop.index }}</td>
           {% for k, v in d.items() %}
-            {% if k not in ['_id','uploaded_at','hospital_name', 'hospital_id'] %}
+            {% if k not in ['_id','uploaded_at','hospital_name', 'hospital_id', 'is_allocated', 'allocated_to_request_id', 'allocated_at'] %}
               <td>{{ v }}</td>
             {% endif %}
           {% endfor %}
           <td>{{ d.uploaded_at.strftime('%Y-%m-%d %H:%M') if d.uploaded_at else '-' }}</td>
           <td>
             <a class="btn-small info" href="{{ url_for('hospital_edit_donor', donor_id=d._id) }}">Edit</a>
-            <a class="btn-small danger"
-               href="{{ url_for('hospital_delete_donor', donor_id=d._id) }}"
-               onclick="return confirm('Delete this donor?')">Delete</a>
           </td>
         </tr>
         {% endfor %}

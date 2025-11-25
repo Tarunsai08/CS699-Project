@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="form-card">
+  <h2>Request an Organ</h2>
+  <form method="post">
+    <label>Select Organ
+      <select name="organ" required>
+        <option value="">-- Select --</option>
+        <option>Kidney</option>
+        <option>Liver</option>
+        <option>Heart</option>
+        <option>Lung</option>
+        <option>Cornea</option>
+        <option>Pancreas</option>
+      </select>
+    </label>
+
+    <button class="btn" type="submit">Submit Request</button>
+  </form>
+</div>
+{% endblock %}
