@@ -1,6 +1,6 @@
-# **Organ Donation Mapper**
+# **DARLA: DONOR AND RECIPIENT LINK ALLOCATOR**
 
-Organ Donation Mapper is a centralized web platform designed to facilitate the connection between medical institutions and patients in need of organ transplants. This application provides a secure environment for hospitals to manage donor records and enables patients to find compatible matches through a data-driven matching system that evaluates blood type, age, and organ viability.
+DARLA is a centralized web platform designed to facilitate the connection between medical institutions and patients in need of organ transplants. This application provides a secure environment for hospitals to manage donor records and enables patients to find compatible matches through a data-driven matching system that evaluates blood type, age, and organ viability.
 
 ## **Features**
 
